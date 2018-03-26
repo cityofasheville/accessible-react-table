@@ -1,8 +1,8 @@
 {
   "name": "accessible-react-table",
-  "version": "1.0.0",
-  "description": "accessible-react-table React component",
-  "main": "lib/index.js",
+  "version": "0.1.0",
+  "description": "A higher order component that adds accessibility features to react-table",
+  "main": "lib/index.jsx",
   "module": "es/index.js",
   "files": [
     "css",
@@ -18,20 +18,42 @@
     "test:coverage": "nwb test-react --coverage",
     "test:watch": "nwb test-react --server"
   },
-  "dependencies": {},
-  "peerDependencies": {
-    "react": "16.x"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dumptruckman/accessible-react-table.git"
   },
-  "devDependencies": {
-    "nwb": "0.21.x",
-    "react": "^16.2.0",
+  "dependencies": {
+    "merge-prop-functions": "^1.0.0",
+    "namor": "^1.0.1",
     "react-dom": "^16.2.0"
   },
-  "author": "",
+  "peerDependencies": {
+    "react": "16.x",
+    "react-table": "^6.8.0",
+    "prop-types": "15.x"
+  },
+  "devDependencies": {
+    "ajv": "^6.0.0",
+    "babel-eslint": "^8.2.2",
+    "babel-plugin-transform-class-properties": "^6.24.1",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "eslint": "^4.19.0",
+    "eslint-config-airbnb": "^16.1.0",
+    "eslint-loader": "^2.0.0",
+    "eslint-plugin-import": "^2.9.0",
+    "eslint-plugin-jsx-a11y": "^6.0.3",
+    "eslint-plugin-react": "^7.7.0",
+    "inferno": "^3.10.1",
+    "nwb": "0.21.x",
+    "prop-types": "^15.6.1",
+    "react": "^16.2.0",
+    "react-table": "^6.8.0"
+  },
+  "author": "Jeremy Wood <contactjeremywood@gmail.com>",
   "homepage": "",
   "license": "MIT",
-  "repository": "",
   "keywords": [
-    "react-component"
+    "react-component",
+    "react-table"
   ]
 }

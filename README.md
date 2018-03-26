@@ -4,13 +4,19 @@
 [![npm package][npm-badge]][npm]
 [![Coveralls][coveralls-badge]][coveralls]
 
-Describe accessible-react-table here.
+A higher order component that adds accessibility features to [react-table](https://react-table.js.org/).
 
-[build-badge]: https://img.shields.io/travis/user/repo/master.png?style=flat-square
-[build]: https://travis-ci.org/user/repo
+## Usage
+The simplest usage to just replace `ReactTable` with `AccessibleReactTable`. You will need the following import.
+```js
+import {AccessibleReactTable} from "../../src";
+```
 
-[npm-badge]: https://img.shields.io/npm/v/npm-package.png?style=flat-square
-[npm]: https://www.npmjs.org/package/npm-package
+[build-badge]: https://img.shields.io/travis/dumptruckman/accessible-react-table/master.png?style=flat-square
+[build]: https://travis-ci.org/dumptruckman/accessible-react-table
 
-[coveralls-badge]: https://img.shields.io/coveralls/user/repo/master.png?style=flat-square
-[coveralls]: https://coveralls.io/github/user/repo
+[npm-badge]: https://img.shields.io/npm/v/accessible-react-table.png?style=flat-square
+[npm]: https://www.npmjs.org/package/accessible-react-table
+
+[coveralls-badge]: https://img.shields.io/coveralls/dumptruckman/accessible-react-table/master.png?style=flat-square
+[coveralls]: https://coveralls.io/github/dumptruckman/accessible-react-table

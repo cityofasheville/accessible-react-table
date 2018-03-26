@@ -1,0 +1,30 @@
+{
+  "parser": "babel-eslint",
+  "extends": "airbnb",
+  "env": {
+    "browser": true,
+    "node": true,
+    "es6": true
+  },
+  "plugins": [
+    "react",
+    "jsx-a11y",
+    "import"
+  ],
+  "rules": {
+    "jsx-a11y/aria-props": 2,
+    "jsx-a11y/heading-has-content": 2,
+    "jsx-a11y/label-has-for": 2,
+    "jsx-a11y/mouse-events-have-key-events": 2,
+    "jsx-a11y/role-has-required-aria-props": 2,
+    "jsx-a11y/role-supports-aria-props": 2,
+    "max-len": 0,
+    "react/jsx-filename-extension": 0,
+    "react/sort-comp": [1, {
+      "order": [
+        "everything-else",
+        "render"
+      ]
+    }]
+  }
+}
