@@ -1,6 +1,6 @@
 {
   "name": "accessible-react-table",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A higher order component that adds accessibility features to react-table",
   "main": "lib/index.jsx",
   "module": "es/index.js",
