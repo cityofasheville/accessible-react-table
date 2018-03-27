@@ -21,8 +21,8 @@ const getCustomTrProps = () => ({
 
 // const exports = module.exports = {};
 
-export default function accessibility(WrappedReactTable) {
-  class KeyboardNavigableReactTable extends React.Component {
+export function accessibility(WrappedReactTable) {
+  class AccessibleReactTable extends React.Component {
     // Filter row counts as a header row.
     extraHeaderRowCount = this.props.filterable ? 1 : 0;
 
@@ -236,10 +236,10 @@ export default function accessibility(WrappedReactTable) {
     tableId: namor.generate({ words: 2 }),
   };
 
-  KeyboardNavigableReactTable.propTypes = { ...WrappedReactTable.propTypes, ...myPropTypes };
-  KeyboardNavigableReactTable.defaultProps = { ...WrappedReactTable.defaultProps, ...myDefaultProps };
+  AccessibleReactTable.propTypes = { ...WrappedReactTable.propTypes, ...myPropTypes };
+  AccessibleReactTable.defaultProps = { ...WrappedReactTable.defaultProps, ...myDefaultProps };
 
-  return KeyboardNavigableReactTable;
+  return AccessibleReactTable;
 }
 
-export const AccessibleReactTable = accessibility(ReactTable);
+export default accessibility(ReactTable);

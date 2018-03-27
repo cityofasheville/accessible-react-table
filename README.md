@@ -9,13 +9,13 @@ A higher order component that adds accessibility features to [react-table](https
 ## Usage
 The simplest usage to just replace `ReactTable` with `AccessibleReactTable`. You will need the following import.
 ```js
-import { AccessibleReactTable } from 'accessible-react-table';
+import AccessibleReactTable from 'accessible-react-table';
 ```
 
 However, as this was developed as a higher order component, you can also use it as such.
 ```js
 import ReactTable from 'react-table';
-import accessibility from 'accessible-react-table';
+import { accessibility } from 'accessible-react-table';
 
 const AccessibleReactTable = accessibility(ReactTable);
 ```

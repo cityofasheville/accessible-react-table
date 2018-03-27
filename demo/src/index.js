@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { render } from 'react-dom';
 import 'react-table/react-table.css';
 import makeData from './utils';
-import { AccessibleReactTable } from '../../src/index';
+import AccessibleReactTable from '../../src/index';
 
 class Demo extends Component {
   constructor() {
