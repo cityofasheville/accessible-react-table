@@ -25,6 +25,10 @@ class Demo extends Component {
                 {
                   Header: 'First Name',
                   accessor: 'firstName',
+                  Cell: (row) => {
+                    console.log('row=', row);
+                    return <span>{row.value}</span>;
+                  },
                 },
                 {
                   Header: 'Last Name',
