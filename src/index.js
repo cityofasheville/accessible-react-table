@@ -4,6 +4,8 @@ import mergeProps from 'merge-prop-functions';
 import ReactTable from 'react-table';
 import namor from 'namor';
 
+const { Provider, Consumer } = React.createContext();
+
 /**
  * Returns the id of the react-table column.
  * In the case of an expander column, which does not have an id, this will return 'rt-expandable'.
@@ -35,8 +37,6 @@ const getCustomTrGroupProps = () => ({
 const getCustomTrProps = () => ({
   role: 'row',
 });
-
-// const exports = module.exports = {};
 
 /**
  * A higher order component function for adding accessibility features to a react-table table.
@@ -195,7 +195,14 @@ export function accessibility(WrappedReactTable) {
           )}"][data-parent="${this.props.tableId}"]`
         );
         if (nodes[0]) {
-          nodes[0].focus();
+          const focusableChildren = nodes[0].querySelectorAll('[data-innerfocus]');
+          if (focusableChildren[0]) {
+            // The cell is using inner focus via CellFocusWrapper so we should focus the wrapper
+            // instead of the cell itself.
+            focusableChildren[0].focus();
+          } else {
+            nodes[0].focus();
+          }
         }
       }
     };
@@ -203,19 +210,27 @@ export function accessibility(WrappedReactTable) {
     /**
      * Checks whether a cell is focusable based on the given row and column.
      *
-     * @param {{allVisibleColumns: {array}}} rtState The state object of the ReactTable
+     * @param {{allVisibleColumns: {array}}} rtState The state object of the ReactTable.
      * @param {number} row The cell's row index.
-     * @param {{id: string, expander: boolean}} column The cell's column
+     * @param {{id: string, expander: boolean}} column The cell's column.
      * @returns {boolean} True if the cell is focusable, otherwise false.
      */
-    isFocused = (rtState, row, column) => {
+    isFocused = (rtState, row, column) => this.isFocusedColId(rtState, row, getColumnId(column));
+
+    /**
+     * Checks whether a cell is focusable based on the given row and column id.
+     *
+     * @param {{allVisibleColumns: {array}}} rtState The state object of the ReactTable.
+     * @param {number} row The cell's row index.
+     * @param {string} columnId The cell's column id.
+     * @returns {boolean} True if the cell is focusable, otherwise false.
+     */
+    isFocusedColId = (rtState, row, columnId) => {
       const focusedRow = this.state.focused.row;
       const focusedCol = this.state.focused.column;
 
-      return (
-        focusedRow === row &&
-        getColumnId(rtState.allVisibleColumns[focusedCol]) === getColumnId(column)
-      );
+      // The column id must be converted from the id string to an index value
+      return focusedRow === row && getColumnId(rtState.allVisibleColumns[focusedCol]) === columnId;
     };
 
     /**
@@ -305,11 +320,19 @@ export function accessibility(WrappedReactTable) {
      */
     getCustomTdProps = (state, rowInfo, column) => {
       if (rowInfo) {
+        const focusable = this.isFocused(
+          state,
+          rowInfo.viewIndex + 1 + this.extraHeaderRowCount,
+          column
+        );
+        let tabIndex = focusable ? 0 : -1;
+        if (column.innerFocus) {
+          tabIndex = undefined;
+        }
         return {
+          focusable: focusable ? 'true' : 'false',
           role: 'gridcell',
-          tabIndex: this.isFocused(state, rowInfo.viewIndex + 1 + this.extraHeaderRowCount, column)
-            ? 0
-            : -1,
+          tabIndex,
           'data-row': rowInfo.viewIndex + 1 + this.extraHeaderRowCount,
           'data-col': getColumnId(column),
           'data-parent': this.props.tableId,
@@ -318,6 +341,41 @@ export function accessibility(WrappedReactTable) {
         };
       }
       return {};
+    };
+
+    contextualizeCell = (columnId, cellRenderer) => row => (
+      <Provider
+        value={{
+          focusable: row.tdProps.rest.focusable,
+        }}
+      >
+        {cellRenderer ? cellRenderer(row) : row.value}
+      </Provider>
+    );
+
+    contextualizeColumn = column => {
+      let { id } = column;
+      if (!id) {
+        id = column.accessor;
+      }
+      if (column.columns) {
+        return {
+          ...column,
+          columns: this.contextualizeColumns(column.columns),
+        };
+      } else {
+        return {
+          ...column,
+          Cell: this.contextualizeCell(id, column.Cell),
+        };
+      }
+    };
+
+    contextualizeColumns = columns => {
+      if (columns) {
+        return columns.map(this.contextualizeColumn);
+      }
+      return undefined;
     };
 
     render() {
@@ -346,6 +404,8 @@ export function accessibility(WrappedReactTable) {
       );
       newProps.getTdProps = mergeProps(this.getCustomTdProps, this.props.getTdProps);
 
+      newProps.columns = this.contextualizeColumns(this.props.columns);
+
       // ... and renders the wrapped component with the fresh data!
       // Notice that we pass through any additional props
       // TODO: combine the onSortedChange function with any from user
@@ -369,6 +429,45 @@ export function accessibility(WrappedReactTable) {
 
   return AccessibleReactTable;
 }
+
+/**
+ * A component for wrapping the contents in a cell renderer when contents contain elements that
+ * can take focus.
+ */
+export class CellFocusWrapper extends React.Component {
+  thisRef = React.createRef();
+  focusRef = React.createRef();
+
+  onCellFocus = e => {
+    if (e.target === this.thisRef.current) {
+      e.preventDefault();
+      e.stopPropagation();
+      this.focusRef.current.focus();
+    }
+  };
+
+  render() {
+    const { Component } = this.props;
+    return (
+      <Consumer>
+        {({ focusable }) => (
+          <Component tabIndex="-1" data-innerfocus onFocus={this.onCellFocus} ref={this.thisRef}>
+            {this.props.children(this.focusRef, focusable)}
+          </Component>
+        )}
+      </Consumer>
+    );
+  }
+}
+
+CellFocusWrapper.propTypes = {
+  Component: PropTypes.node,
+  children: PropTypes.func.isRequired,
+};
+
+CellFocusWrapper.defaultProps = {
+  Component: 'div',
+};
 
 /**
  * A pre-wrapped AccessibleReactTable.
