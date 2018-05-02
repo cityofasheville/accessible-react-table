@@ -4,6 +4,10 @@ import mergeProps from 'merge-prop-functions';
 import ReactTable from 'react-table';
 import namor from 'namor';
 
+export const AccessibleReactTableContext = React.createContext();
+
+const { Provider } = AccessibleReactTableContext;
+
 const getColumnId = (column) => {
   if (column.id) {
     return column.id;
@@ -42,6 +46,7 @@ export function accessibility(WrappedReactTable) {
     };
 
     onFocus = (rtState, rowIndex, column) => () => {
+      console.log('focused row=', rowIndex);
       const columnId = getColumnId(column);
       const newFocused = {
         row: rowIndex,
@@ -125,11 +130,14 @@ export function accessibility(WrappedReactTable) {
       }
     };
 
-    isFocused = (rtState, row, column) => {
+    isFocused = (rtState, row, column) => this.isFocused(rtState, row, getColumnId(column));
+
+    isFocusedColId = (rtState, row, columnId) => {
       const focusedRow = this.state.focused.row;
       const focusedCol = this.state.focused.column;
 
-      return focusedRow === row && getColumnId(rtState.allVisibleColumns[focusedCol]) === getColumnId(column);
+      // TODO Going to have to cache the visible columns...
+      return focusedRow === row && getColumnId(rtState.allVisibleColumns[focusedCol]) === columnId;
     };
 
     getCustomTableProps = () => {
@@ -203,6 +211,40 @@ export function accessibility(WrappedReactTable) {
       return {};
     };
 
+    contextualizeCell = (columnId, cellRenderer) => {
+      if (cellRenderer) {
+        return (row) => {
+          // cell renderer row index has to account for header rows
+          const focusable = this.isFocusedColId(state, row.index + 1 + this.extraHeaderRowCount, columnId);
+          return (
+            <Provider value={{ nameAdder: () => { } }}>
+              {cellRenderer(row)}
+            </Provider>
+          );
+        };
+      }
+      return undefined;
+    };
+
+    contextualizeColumn = (column) => {
+      let { id } = column;
+      if (!id) {
+        id = column.accessor;
+      }
+      return {
+        ...column,
+        Cell: this.contextualizeCell(id, column.Cell),
+        columns: this.contextualizeColumns(column.columns),
+      };
+    };
+
+    contextualizeColumns = (columns) => {
+      if (columns) {
+        return columns.map(this.contextualizeColumn);
+      }
+      return undefined;
+    };
+
     render() {
       const newProps = { ...this.props };
 
@@ -219,6 +261,8 @@ export function accessibility(WrappedReactTable) {
       newProps.getTheadThProps = mergeProps(this.getCustomTheadThProps, this.props.getTheadThProps);
       newProps.getTheadFilterThProps = mergeProps(this.getCustomTheadFilterThProps, this.props.getTheadFilterThProps);
       newProps.getTdProps = mergeProps(this.getCustomTdProps, this.props.getTdProps);
+
+      newProps.columns = this.contextualizeColumns(this.props.columns);
 
       // ... and renders the wrapped component with the fresh data!
       // Notice that we pass through any additional props
