@@ -4,7 +4,7 @@ import mergeProps from 'merge-prop-functions';
 import ReactTable from 'react-table';
 import namor from 'namor';
 
-const getColumnId = (column) => {
+const getColumnId = column => {
   if (column.id) {
     return column.id;
   }
@@ -33,7 +33,7 @@ export function accessibility(WrappedReactTable) {
       },
     };
 
-    onSortedChange = (sorted) => {
+    onSortedChange = sorted => {
       // Store the react-table sorted data in this components state.
       this.setState({
         sorted: sorted[0],
@@ -52,7 +52,7 @@ export function accessibility(WrappedReactTable) {
       });
     };
 
-    onKeyDown = rtState => (e) => {
+    onKeyDown = rtState => e => {
       const columns = rtState.allVisibleColumns;
       let focusedCol = this.state.focused.column;
       let focusedRow = this.state.focused.row;
@@ -117,7 +117,11 @@ export function accessibility(WrappedReactTable) {
       if (changed) {
         e.preventDefault();
 
-        const nodes = document.querySelectorAll(`[data-row="${focusedRow}"][data-col="${getColumnId(columns[focusedCol])}"][data-parent="${this.props.tableId}"]`);
+        const nodes = document.querySelectorAll(
+          `[data-row="${focusedRow}"][data-col="${getColumnId(
+            columns[focusedCol]
+          )}"][data-parent="${this.props.tableId}"]`
+        );
         if (nodes[0]) {
           nodes[0].focus();
         }
@@ -128,7 +132,10 @@ export function accessibility(WrappedReactTable) {
       const focusedRow = this.state.focused.row;
       const focusedCol = this.state.focused.column;
 
-      return focusedRow === row && getColumnId(rtState.allVisibleColumns[focusedCol]) === getColumnId(column);
+      return (
+        focusedRow === row &&
+        getColumnId(rtState.allVisibleColumns[focusedCol]) === getColumnId(column)
+      );
     };
 
     getCustomTableProps = () => {
@@ -155,7 +162,7 @@ export function accessibility(WrappedReactTable) {
       // Determine sorted attribute
       let ariaSort;
       if (sorted && column.id === sorted.id) {
-        ariaSort = (sorted.desc ? 'descending' : 'ascending');
+        ariaSort = sorted.desc ? 'descending' : 'ascending';
       } else {
         ariaSort = 'none';
       }
@@ -184,15 +191,17 @@ export function accessibility(WrappedReactTable) {
 
     getCustomTdProps = (state, rowInfo, column) => {
       if (rowInfo) {
-        return ({
+        return {
           role: 'gridcell',
-          tabIndex: this.isFocused(state, rowInfo.viewIndex + 1 + this.extraHeaderRowCount, column) ? 0 : -1,
+          tabIndex: this.isFocused(state, rowInfo.viewIndex + 1 + this.extraHeaderRowCount, column)
+            ? 0
+            : -1,
           'data-row': rowInfo.viewIndex + 1 + this.extraHeaderRowCount,
           'data-col': getColumnId(column),
           'data-parent': this.props.tableId,
           onFocus: this.onFocus(state, rowInfo.viewIndex + 1 + this.extraHeaderRowCount, column),
           onKeyDown: this.onKeyDown(state),
-        });
+        };
       }
       return {};
     };
@@ -203,25 +212,29 @@ export function accessibility(WrappedReactTable) {
       // Table parts that use stateless prop callbacks
       newProps.getTheadProps = mergeProps(getCustomTrGroupProps, this.props.getTheadProps);
       newProps.getTbodyProps = mergeProps(getCustomTrGroupProps, this.props.getTbodyProps);
-      newProps.getTheadFilterProps = mergeProps(getCustomTrGroupProps, this.props.getTheadFilterProps);
+      newProps.getTheadFilterProps = mergeProps(
+        getCustomTrGroupProps,
+        this.props.getTheadFilterProps
+      );
       newProps.getTheadTrProps = mergeProps(getCustomTrProps, this.props.getTheadTrProps);
-      newProps.getTheadFilterTrProps = mergeProps(getCustomTrProps, this.props.getTheadFilterTrProps);
+      newProps.getTheadFilterTrProps = mergeProps(
+        getCustomTrProps,
+        this.props.getTheadFilterTrProps
+      );
       newProps.getTrProps = mergeProps(getCustomTrProps, this.props.getTrProps);
 
       // Table parts that use stateful prop callbacks
       newProps.getTableProps = mergeProps(this.getCustomTableProps, this.props.getTableProps);
       newProps.getTheadThProps = mergeProps(this.getCustomTheadThProps, this.props.getTheadThProps);
-      newProps.getTheadFilterThProps = mergeProps(this.getCustomTheadFilterThProps, this.props.getTheadFilterThProps);
+      newProps.getTheadFilterThProps = mergeProps(
+        this.getCustomTheadFilterThProps,
+        this.props.getTheadFilterThProps
+      );
       newProps.getTdProps = mergeProps(this.getCustomTdProps, this.props.getTdProps);
 
       // ... and renders the wrapped component with the fresh data!
       // Notice that we pass through any additional props
-      return (
-        <WrappedReactTable
-          {...newProps}
-          onSortedChange={this.onSortedChange}
-        />
-      );
+      return <WrappedReactTable {...newProps} onSortedChange={this.onSortedChange} />;
     }
   }
 

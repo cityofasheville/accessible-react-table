@@ -64,4 +64,4 @@ class Demo extends Component {
   }
 }
 
-render(<Demo />, document.querySelector('#demo'));
+render(<Demo />, document.getElementById('app'));
