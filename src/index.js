@@ -192,8 +192,12 @@ export function accessibility(WrappedReactTable) {
 
     getCustomTdProps = (state, rowInfo, column) => {
       if (rowInfo) {
-        const focusable = this.isFocused(state, rowInfo.viewIndex + 1 + this.extraHeaderRowCount, column);
-        return ({
+        const focusable = this.isFocused(
+          state,
+          rowInfo.viewIndex + 1 + this.extraHeaderRowCount,
+          column
+        );
+        return {
           focusable,
           role: 'gridcell',
           tabIndex: focusable && !this.state.focused.managedByChild ? 0 : -1,
@@ -202,10 +206,10 @@ export function accessibility(WrappedReactTable) {
           'data-parent': this.props.tableId,
           onFocus: this.onFocus(state, rowInfo.viewIndex + 1 + this.extraHeaderRowCount, column),
           onKeyDown: this.onKeyDown(state),
-          onFocus2: (e) => {
+          onFocus2: e => {
             console.log(e);
           },
-        });
+        };
       }
       return {};
     };
