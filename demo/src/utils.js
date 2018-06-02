@@ -13,7 +13,7 @@ copies or substantial portions of the Software.
  */
 import namor from 'namor';
 
-const range = (len) => {
+const range = len => {
   const arr = [];
   for (let i = 0; i < len; i += 1) {
     arr.push(i);
