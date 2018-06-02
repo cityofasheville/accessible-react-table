@@ -15,11 +15,11 @@
   },
   "dependencies": {
     "merge-prop-functions": "^1.0.0",
-    "namor": "^1.0.1"
+    "namor": "^1.0.1",
+    "react-dom": "^16.3.2"
   },
   "peerDependencies": {
-    "react": "16.x",
-    "react-dom": "^16.2.0",
+    "react": "^16.3.x",
     "react-table": "^6.8.0",
     "prop-types": "15.x"
   },
@@ -45,7 +45,7 @@
     "html-webpack-plugin": "^3.2.0",
     "prettier": "^1.13.0",
     "prop-types": "^15.6.1",
-    "react": "^16.2.0",
+    "react": "^16.3.2",
     "react-dom": "^16.4.0",
     "react-table": "^6.8.0",
     "rollup": "^0.59.4",

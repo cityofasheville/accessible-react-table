@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { render } from 'react-dom';
 import 'react-table/react-table.css';
 import makeData from './utils';
-import AccessibleReactTable from '../../src/index';
+import AccessibleReactTable, { AccessibleReactTableContext as Context } from '../../src/index';
 
 class Demo extends Component {
   constructor() {
@@ -27,7 +27,16 @@ class Demo extends Component {
                   accessor: 'firstName',
                   Cell: (row) => {
                     console.log('row=', row);
-                    return <span>{row.value}</span>;
+                    return (
+                      <Context.Consumer>
+                        {({ nameAdder }) => {
+                          nameAdder(row.value);
+                          return (
+                            <span>{`${row.value}`}</span>
+                          );
+                        }}
+                      </Context.Consumer>
+                    );
                   },
                 },
                 {
