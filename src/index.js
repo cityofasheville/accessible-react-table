@@ -8,7 +8,7 @@ export const AccessibleReactTableContext = React.createContext();
 
 const { Provider } = AccessibleReactTableContext;
 
-const getColumnId = (column) => {
+const getColumnId = column => {
   if (column.id) {
     return column.id;
   }
@@ -221,20 +221,20 @@ export function accessibility(WrappedReactTable) {
 
     contextualizeCell = (columnId, cellRenderer) => {
       if (cellRenderer) {
-        return (row) => {
+        return row => {
           // cell renderer row index has to account for header rows
-          const focusable = this.isFocusedColId(state, row.index + 1 + this.extraHeaderRowCount, columnId);
-          return (
-            <Provider value={{ nameAdder: () => { } }}>
-              {cellRenderer(row)}
-            </Provider>
+          const focusable = this.isFocusedColId(
+            state,
+            row.index + 1 + this.extraHeaderRowCount,
+            columnId
           );
+          return <Provider value={{ nameAdder: () => {} }}>{cellRenderer(row)}</Provider>;
         };
       }
       return undefined;
     };
 
-    contextualizeColumn = (column) => {
+    contextualizeColumn = column => {
       let { id } = column;
       if (!id) {
         id = column.accessor;
@@ -246,7 +246,7 @@ export function accessibility(WrappedReactTable) {
       };
     };
 
-    contextualizeColumns = (columns) => {
+    contextualizeColumns = columns => {
       if (columns) {
         return columns.map(this.contextualizeColumn);
       }
