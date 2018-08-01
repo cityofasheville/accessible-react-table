@@ -330,7 +330,7 @@ export function accessibility(WrappedReactTable) {
           tabIndex = undefined;
         }
         return {
-          canFocus: focusable,
+          'data-focusable': focusable,
           role: 'gridcell',
           tabIndex,
           'data-row': rowInfo.viewIndex + 1 + this.extraHeaderRowCount,
@@ -346,7 +346,7 @@ export function accessibility(WrappedReactTable) {
     contextualizeCell = (columnId, cellRenderer) => row => (
       <Provider
         value={{
-          focusable: row.tdProps.rest.canFocus,
+          focusable: row.tdProps.rest['data-focusable'],
         }}
       >
         {cellRenderer ? cellRenderer(row) : row.value}
