@@ -4,9 +4,9 @@ import mergeProps from 'merge-prop-functions';
 import ReactTable from 'react-table';
 import namor from 'namor';
 
-export const AccessibleReactTableContext = React.createContext();
+const AccessibleReactTableContext = React.createContext();
 
-const { Provider } = AccessibleReactTableContext;
+const { Provider, Consumer } = AccessibleReactTableContext;
 
 /**
  * Returns the id of the react-table column.
@@ -39,8 +39,6 @@ const getCustomTrGroupProps = () => ({
 const getCustomTrProps = () => ({
   role: 'row',
 });
-
-// const exports = module.exports = {};
 
 /**
  * A higher order component function for adding accessibility features to a react-table table.
@@ -79,7 +77,6 @@ export function accessibility(WrappedReactTable) {
       focused: {
         row: 1 + this.extraHeaderRowCount,
         column: 0,
-        managedByChild: false,
       },
     };
 
@@ -103,7 +100,6 @@ export function accessibility(WrappedReactTable) {
      * @returns {Function} The focus handler function for a table cell.
      */
     onFocus = (rtState, rowIndex, column) => () => {
-      console.log('focused row=', rowIndex);
       const columnId = getColumnId(column);
       const newFocused = {
         row: rowIndex,
@@ -201,7 +197,12 @@ export function accessibility(WrappedReactTable) {
           )}"][data-parent="${this.props.tableId}"]`
         );
         if (nodes[0]) {
-          nodes[0].focus();
+          const focusableChildren = nodes[0].querySelectorAll('[data-innerfocus]');
+          if (focusableChildren[0]) {
+            focusableChildren[0].focus();
+          } else {
+            nodes[0].focus();
+          }
         }
       }
     };
@@ -214,7 +215,7 @@ export function accessibility(WrappedReactTable) {
      * @param {{id: string, expander: boolean}} column The cell's column
      * @returns {boolean} True if the cell is focusable, otherwise false.
      */
-    isFocused = (rtState, row, column) => this.isFocused(rtState, row, getColumnId(column));
+    isFocused = (rtState, row, column) => this.isFocusedColId(rtState, row, getColumnId(column));
 
     isFocusedColId = (rtState, row, columnId) => {
       const focusedRow = this.state.focused.row;
@@ -316,48 +317,50 @@ export function accessibility(WrappedReactTable) {
           rowInfo.viewIndex + 1 + this.extraHeaderRowCount,
           column
         );
+        let tabIndex = focusable ? 0 : -1;
+        if (column.innerFocus) {
+          tabIndex = undefined;
+        }
         return {
-          focusable,
+          focusable: focusable ? 'true' : 'false',
           role: 'gridcell',
-          tabIndex: focusable && !this.state.focused.managedByChild ? 0 : -1,
+          tabIndex,
           'data-row': rowInfo.viewIndex + 1 + this.extraHeaderRowCount,
           'data-col': getColumnId(column),
           'data-parent': this.props.tableId,
           onFocus: this.onFocus(state, rowInfo.viewIndex + 1 + this.extraHeaderRowCount, column),
           onKeyDown: this.onKeyDown(state),
-          onFocus2: e => {
-            console.log(e);
-          },
         };
       }
       return {};
     };
 
-    contextualizeCell = (columnId, cellRenderer) => {
-      if (cellRenderer) {
-        return row => {
-          // cell renderer row index has to account for header rows
-          const focusable = this.isFocusedColId(
-            state,
-            row.index + 1 + this.extraHeaderRowCount,
-            columnId
-          );
-          return <Provider value={{ nameAdder: () => {} }}>{cellRenderer(row)}</Provider>;
-        };
-      }
-      return undefined;
-    };
+    contextualizeCell = (columnId, cellRenderer) => row => (
+      <Provider
+        value={{
+          focusable: row.tdProps.rest.focusable,
+        }}
+      >
+        {cellRenderer ? cellRenderer(row) : row.value}
+      </Provider>
+    );
 
     contextualizeColumn = column => {
       let { id } = column;
       if (!id) {
         id = column.accessor;
       }
-      return {
-        ...column,
-        Cell: this.contextualizeCell(id, column.Cell),
-        columns: this.contextualizeColumns(column.columns),
-      };
+      if (column.columns) {
+        return {
+          ...column,
+          columns: this.contextualizeColumns(column.columns),
+        };
+      } else {
+        return {
+          ...column,
+          Cell: this.contextualizeCell(id, column.Cell),
+        };
+      }
     };
 
     contextualizeColumns = columns => {
@@ -417,6 +420,45 @@ export function accessibility(WrappedReactTable) {
 
   return AccessibleReactTable;
 }
+
+/**
+ * A component for wrapping the contents in a cell renderer when contents contain elements that
+ * can take focus.
+ */
+export class CellFocusWrapper extends React.Component {
+  thisRef = React.createRef();
+  focusRef = React.createRef();
+
+  onCellFocus = e => {
+    if (e.target === this.thisRef.current) {
+      e.preventDefault();
+      e.stopPropagation();
+      this.focusRef.current.focus();
+    }
+  };
+
+  render() {
+    const { Component } = this.props;
+    return (
+      <Consumer>
+        {({ focusable }) => (
+          <Component tabIndex="-1" data-innerfocus onFocus={this.onCellFocus} ref={this.thisRef}>
+            {this.props.children(this.focusRef, focusable)}
+          </Component>
+        )}
+      </Consumer>
+    );
+  }
+}
+
+CellFocusWrapper.propTypes = {
+  Component: PropTypes.node,
+  children: PropTypes.func.isRequired,
+};
+
+CellFocusWrapper.defaultProps = {
+  Component: 'div',
+};
 
 /**
  * A pre-wrapped AccessibleReactTable.

@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { render } from 'react-dom';
 import 'react-table/react-table.css';
 import makeData from './utils';
-import AccessibleReactTable, { AccessibleReactTableContext as Context } from '../../src/index';
+import AccessibleReactTable, { CellFocusWrapper } from '../../src/index';
 
 class Demo extends Component {
   constructor() {
@@ -25,19 +25,20 @@ class Demo extends Component {
                 {
                   Header: 'First Name',
                   accessor: 'firstName',
-                  Cell: (row) => {
-                    console.log('row=', row);
-                    return (
-                      <Context.Consumer>
-                        {({ nameAdder }) => {
-                          nameAdder(row.value);
-                          return (
-                            <span>{`${row.value}`}</span>
-                          );
-                        }}
-                      </Context.Consumer>
-                    );
-                  },
+                  innerFocus: true,
+                  Cell: row => (
+                    <CellFocusWrapper>
+                      {(focusRef, focusable) => (
+                        /* tabIndex must be set this way in order to obey grid pattern when a
+                          cell contains focusable elements inside of it. This cell renderer will
+                          need to control any keyboard navigation for multiple focusable elements
+                          within it. */
+                        <a href="#" tabIndex={focusable ? 0 : -1} ref={focusRef}>
+                          {`${row.value}`}
+                        </a>
+                      )}
+                    </CellFocusWrapper>
+                  ),
                 },
                 {
                   Header: 'Last Name',
