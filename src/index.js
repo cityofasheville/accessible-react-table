@@ -2,7 +2,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import mergeProps from 'merge-prop-functions';
 import ReactTable from 'react-table';
-import namor from 'namor';
 
 const { Provider, Consumer } = React.createContext();
 
@@ -37,6 +36,22 @@ const getCustomTrGroupProps = () => ({
 const getCustomTrProps = () => ({
   role: 'row',
 });
+
+/**
+ * Generates a randomized string that looks like a GUID and is unique enough for this library.
+ *
+ * As per top answer: https://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript
+ *
+ * @returns {string} a randomized mostly unique string
+ */
+function guid() {
+  function s4() {
+    return Math.floor((1 + Math.random()) * 0x10000)
+      .toString(16)
+      .substring(1);
+  }
+  return `${s4() + s4()}-${s4()}-${s4()}-${s4()}-${s4()}${s4()}${s4()}`;
+}
 
 /**
  * A stateless component for replacing the built in filter component of react-table with one that
@@ -90,7 +105,7 @@ export function accessibility(WrappedReactTable) {
      * The id of the table which must be unique.
      * @type {string}
      */
-    tableId = this.props.tableId || namor.generate({ words: 3 });
+    tableId = this.props.tableId || guid();
 
     /**
      * How many many extra rows to count as a header row. Notably, the filter row counts as a

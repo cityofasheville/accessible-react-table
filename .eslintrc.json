@@ -14,6 +14,7 @@
   ],
   "rules": {
     "arrow-body-style": "warn",
+    "import/no-extraneous-dependencies": "warn",
     "prettier/prettier": "error",
     "jsx-a11y/anchor-is-valid": 1,
     "jsx-a11y/aria-props": 2,
