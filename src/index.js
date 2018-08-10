@@ -122,6 +122,7 @@ export function accessibility(WrappedReactTable) {
       focused: {
         row: 1 + this.extraHeaderRowCount,
         column: 0,
+        columnId: undefined,
       },
     };
 
@@ -149,6 +150,7 @@ export function accessibility(WrappedReactTable) {
       const newFocused = {
         row: rowIndex,
         column: rtState.allVisibleColumns.findIndex(c => getColumnId(c) === columnId),
+        columnId,
       };
 
       this.setState({
@@ -345,15 +347,19 @@ export function accessibility(WrappedReactTable) {
      * @returns {{role: string, tabIndex: number, 'data-row': number, 'data-col': string, 'data-parent': string, onFocus: Function, onKeyDown: Function}}
      * A props object for a table head filter header.
      */
-    getCustomTheadFilterThProps = (state, rowInfo, column) => ({
-      role: 'columnheader', // TODO proper role here?
-      tabIndex: this.isFocused(state, 1, column) ? 0 : -1,
-      'data-row': 1,
-      'data-col': getColumnId(column),
-      'data-parent': this.tableId,
-      onFocus: this.onFocus(state, 1, column),
-      onKeyDown: this.onKeyDown(state),
-    });
+    getCustomTheadFilterThProps = (state, rowInfo, column) => {
+      const focusable = this.isFocused(state, 1, column);
+      return {
+        'data-focusable': focusable,
+        role: 'columnheader', // TODO proper role here?
+        tabIndex: undefined,
+        'data-row': 1,
+        'data-col': getColumnId(column),
+        'data-parent': this.tableId,
+        onFocus: this.onFocus(state, 1, column),
+        onKeyDown: this.onKeyDown(state),
+      };
+    };
 
     /**
      * A function for generating props for a table cell.
@@ -401,7 +407,13 @@ export function accessibility(WrappedReactTable) {
     );
 
     contextualizeFilter = (columnId, filterRenderer) => row => (
-      <Provider value>{filterRenderer ? filterRenderer(row) : DefaultFilterRenderer(row)}</Provider>
+      <Provider
+        value={{
+          focusable: this.state.focused.columnId === columnId && this.state.focused.row === 1,
+        }}
+      >
+        {filterRenderer ? filterRenderer(row) : DefaultFilterRenderer(row)}
+      </Provider>
     );
 
     contextualizeColumn = column => {
