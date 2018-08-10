@@ -39,6 +39,32 @@ const getCustomTrProps = () => ({
 });
 
 /**
+ * A stateless component for replacing the built in filter component of react-table with one that
+ * obeys the WAI-ARIA grid pattern.
+ */
+const DefaultFilterRenderer = ({ filter, onChange }) => (
+  <CellFocusWrapper>
+    {(focusRef, focusable) => (
+      <input
+        type="text"
+        tabIndex={focusable ? 0 : -1}
+        style={{
+          width: '100%',
+        }}
+        value={filter ? filter.value : ''}
+        onChange={event => onChange(event.target.value)}
+        ref={focusRef}
+      />
+    )}
+  </CellFocusWrapper>
+);
+
+DefaultFilterRenderer.propTypes = {
+  filter: PropTypes.string.isRequired,
+  onChange: PropTypes.func.isRequired,
+};
+
+/**
  * A higher order component function for adding accessibility features to a react-table table.
  *
  * @param {ReactTable} WrappedReactTable The table to wrap with accessibility features.
@@ -353,6 +379,10 @@ export function accessibility(WrappedReactTable) {
       </Provider>
     );
 
+    contextualizeFilter = (columnId, filterRenderer) => row => (
+      <Provider value>{filterRenderer ? filterRenderer(row) : DefaultFilterRenderer(row)}</Provider>
+    );
+
     contextualizeColumn = column => {
       let { id } = column;
       if (!id) {
@@ -367,6 +397,7 @@ export function accessibility(WrappedReactTable) {
         return {
           ...column,
           Cell: this.contextualizeCell(id, column.Cell),
+          Filter: this.contextualizeFilter(id, column.Filter),
         };
       }
     };
