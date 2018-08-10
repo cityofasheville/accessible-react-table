@@ -87,6 +87,12 @@ export function accessibility(WrappedReactTable) {
    */
   class AccessibleReactTable extends React.Component {
     /**
+     * The id of the table which must be unique.
+     * @type {string}
+     */
+    tableId = this.props.tableId || namor.generate({ words: 3 });
+
+    /**
      * How many many extra rows to count as a header row. Notably, the filter row counts as a
      * header row.
      * @type {number}
@@ -218,7 +224,7 @@ export function accessibility(WrappedReactTable) {
         const nodes = document.querySelectorAll(
           `[data-row="${focusedRow}"][data-col="${getColumnId(
             columns[focusedCol]
-          )}"][data-parent="${this.props.tableId}"]`
+          )}"][data-parent="${this.tableId}"]`
         );
         if (nodes[0]) {
           const focusableChildren = nodes[0].querySelectorAll('[data-innerfocus]');
@@ -309,7 +315,7 @@ export function accessibility(WrappedReactTable) {
         tabIndex: this.isFocused(state, 0, column) ? 0 : -1,
         'data-row': 0,
         'data-col': getColumnId(column),
-        'data-parent': this.props.tableId,
+        'data-parent': this.tableId,
         onFocus: this.onFocus(state, 0, column),
         onKeyDown: this.onKeyDown(state),
       };
@@ -329,7 +335,7 @@ export function accessibility(WrappedReactTable) {
       tabIndex: this.isFocused(state, 1, column) ? 0 : -1,
       'data-row': 1,
       'data-col': getColumnId(column),
-      'data-parent': this.props.tableId,
+      'data-parent': this.tableId,
       onFocus: this.onFocus(state, 1, column),
       onKeyDown: this.onKeyDown(state),
     });
@@ -361,7 +367,7 @@ export function accessibility(WrappedReactTable) {
           tabIndex,
           'data-row': rowInfo.viewIndex + 1 + this.extraHeaderRowCount,
           'data-col': getColumnId(column),
-          'data-parent': this.props.tableId,
+          'data-parent': this.tableId,
           onFocus: this.onFocus(state, rowInfo.viewIndex + 1 + this.extraHeaderRowCount, column),
           onKeyDown: this.onKeyDown(state),
         };
@@ -451,12 +457,7 @@ export function accessibility(WrappedReactTable) {
     ariaDescribedBy: PropTypes.string,
   };
 
-  const myDefaultProps = {
-    tableId: namor.generate({ words: 2 }),
-  };
-
   AccessibleReactTable.propTypes = { ...WrappedReactTable.propTypes, ...myPropTypes };
-  AccessibleReactTable.defaultProps = { ...WrappedReactTable.defaultProps, ...myDefaultProps };
 
   return AccessibleReactTable;
 }
