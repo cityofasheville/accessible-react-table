@@ -10,7 +10,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/dumptruckman/accessible-react-table.git"
+    "url": "git+https://github.com/cityofasheville/accessible-react-table.git"
   },
   "dependencies": {
     "merge-prop-functions": "^1.0.0",
