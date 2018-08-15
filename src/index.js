@@ -137,6 +137,18 @@ export function accessibility(WrappedReactTable) {
       });
     };
 
+    onPageSizeChange = pageSize => {
+      if (pageSize <= this.state.focused.row) {
+        this.setState(prevState => ({
+          focused: {
+            row: pageSize + this.extraHeaderRowCount,
+            column: prevState.focused.column,
+            columnId: prevState.focused.columnId,
+          },
+        }));
+      }
+    };
+
     /**
      * A function for creating a focus handler function for a table cell.
      *
@@ -472,8 +484,14 @@ export function accessibility(WrappedReactTable) {
 
       // ... and renders the wrapped component with the fresh data!
       // Notice that we pass through any additional props
-      // TODO: combine the onSortedChange function with any from user
-      return <WrappedReactTable {...newProps} onSortedChange={this.onSortedChange} />;
+      // TODO: combine the onChange functions with any from user
+      return (
+        <WrappedReactTable
+          {...newProps}
+          onSortedChange={this.onSortedChange}
+          onPageSizeChange={this.onPageSizeChange}
+        />
+      );
     }
   }
 
