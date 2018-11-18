@@ -124,6 +124,7 @@ export function accessibility(WrappedReactTable) {
         column: 0,
         columnId: undefined,
       },
+      expanded: {},
     };
 
     /**
@@ -454,6 +455,10 @@ export function accessibility(WrappedReactTable) {
       return undefined;
     };
 
+    handleExpandedChange = newExpanded => {
+      this.setState({ expanded: newExpanded });
+    };
+
     render() {
       const newProps = { ...this.props };
 
@@ -481,6 +486,16 @@ export function accessibility(WrappedReactTable) {
       newProps.getTdProps = mergeProps(this.getCustomTdProps, this.props.getTdProps);
 
       newProps.columns = this.contextualizeColumns(this.props.columns);
+
+      // This is needed because something unknown in this HoC only allowed one sub component to be
+      // expanded at a time.
+      if (!this.props.expanded) {
+        newProps.expanded = this.state.expanded;
+        newProps.onExpandedChange = mergeProps(
+          this.handleExpandedChange,
+          this.props.onExpandedChange
+        );
+      }
 
       // ... and renders the wrapped component with the fresh data!
       // Notice that we pass through any additional props
