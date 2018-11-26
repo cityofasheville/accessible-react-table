@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import mergeProps from 'merge-prop-functions';
+import mergeProps, { mergeFunctions } from 'merge-prop-functions';
 import ReactTable from 'react-table';
 
 const { Provider, Consumer } = React.createContext();
@@ -124,6 +124,7 @@ export function accessibility(WrappedReactTable) {
         column: 0,
         columnId: undefined,
       },
+      expanded: {},
     };
 
     /**
@@ -454,6 +455,10 @@ export function accessibility(WrappedReactTable) {
       return undefined;
     };
 
+    handleExpandedChange = newExpanded => {
+      this.setState({ expanded: newExpanded });
+    };
+
     render() {
       const newProps = { ...this.props };
 
@@ -482,16 +487,28 @@ export function accessibility(WrappedReactTable) {
 
       newProps.columns = this.contextualizeColumns(this.props.columns);
 
+      // This is needed because something unknown in this HoC only allowed one sub component to be
+      // expanded at a time.
+      if (!this.props.expanded) {
+        newProps.expanded = this.state.expanded;
+        newProps.onExpandedChange = mergeProps(
+          this.handleExpandedChange,
+          this.props.onExpandedChange
+        );
+      }
+
+      newProps.onSortedChange = this.props.onSortedChange
+        ? mergeFunctions(this.onSortedChange, this.props.onSortedChange)
+        : this.onSortedChange;
+
+      newProps.onPageSizeChange = this.props.onPageSizeChange
+        ? mergeFunctions(this.onPageSizeChange, this.props.onPageSizeChange)
+        : this.onPageSizeChange;
+
       // ... and renders the wrapped component with the fresh data!
       // Notice that we pass through any additional props
       // TODO: combine the onChange functions with any from user
-      return (
-        <WrappedReactTable
-          {...newProps}
-          onSortedChange={this.onSortedChange}
-          onPageSizeChange={this.onPageSizeChange}
-        />
-      );
+      return <WrappedReactTable {...newProps} />;
     }
   }
 
