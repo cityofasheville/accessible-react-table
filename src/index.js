@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import mergeProps from 'merge-prop-functions';
+import mergeProps, { mergeFunctions } from 'merge-prop-functions';
 import ReactTable from 'react-table';
 
 const { Provider, Consumer } = React.createContext();
@@ -497,16 +497,18 @@ export function accessibility(WrappedReactTable) {
         );
       }
 
+      newProps.onSortedChange = this.props.onSortedChange
+        ? mergeFunctions(this.onSortedChange, this.props.onSortedChange)
+        : this.onSortedChange;
+
+      newProps.onPageSizeChange = this.props.onPageSizeChange
+        ? mergeFunctions(this.onPageSizeChange, this.props.onPageSizeChange)
+        : this.onPageSizeChange;
+
       // ... and renders the wrapped component with the fresh data!
       // Notice that we pass through any additional props
       // TODO: combine the onChange functions with any from user
-      return (
-        <WrappedReactTable
-          {...newProps}
-          onSortedChange={this.onSortedChange}
-          onPageSizeChange={this.onPageSizeChange}
-        />
-      );
+      return <WrappedReactTable {...newProps} />;
     }
   }
 
